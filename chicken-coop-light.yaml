@@ -1,0 +1,68 @@
+esphome:
+  name: chicken-coop-light
+  friendly_name: Chicken Coop Light
+
+esp8266:
+  board: esp01_1m
+
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  ap:
+    ssid: "Chicken Coop Light Fallback"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+# SparkFun Blynk Board onboard I2C bus.
+# The original hardware uses GPIO2 (SDA) and GPIO14 (SCL).
+i2c:
+  sda: GPIO2
+  scl: GPIO14
+  scan: true
+
+# GPIO5 drives the MOSFET controlling the coop LED lighting.
+output:
+  - platform: esp8266_pwm
+    pin: GPIO5
+    frequency: 1000 Hz
+    id: coop_light_pwm
+
+light:
+  - platform: monochromatic
+    name: "Coop Light"
+    id: coop_light
+    output: coop_light_pwm
+    restore_mode: RESTORE_DEFAULT_OFF
+
+sensor:
+  # Onboard Si7021 / HTU21D-compatible temperature and humidity sensor.
+  - platform: htu21d
+    model: SI7021
+    temperature:
+      name: "Board Temperature"
+    humidity:
+      name: "Coop Humidity"
+    update_interval: 60s
+
+  # External TMP36 temperature sensor connected to A0.
+  # Preserve the original firmware's 3.2 V full-scale conversion.
+  - platform: adc
+    pin: A0
+    name: "Coop Temperature"
+    update_interval: 60s
+    unit_of_measurement: "°F"
+    accuracy_decimals: 1
+    filters:
+      - lambda: |-
+          float voltage = x * 3.2f;
+          float temp_c = (voltage - 0.5f) * 100.0f;
+          return temp_c * 9.0f / 5.0f + 32.0f;

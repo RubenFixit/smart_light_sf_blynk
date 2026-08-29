@@ -1,5 +1,5 @@
 esphome:
-  name: diy-habor-freight-worklight
+  name: diy-hf-worklight
   friendly_name: DIY Habor Freight Worklight
 
 esp8266:
@@ -28,18 +28,18 @@ i2c:
   scl: GPIO14
   scan: true
 
-# GPIO5 drives the MOSFET controlling the coop LED lighting.
+# GPIO5 drives the MOSFET controlling the LED light pannels.
 output:
   - platform: esp8266_pwm
     pin: GPIO5
     frequency: 1000 Hz
-    id: coop_light_pwm
+    id: light_pwm
 
 light:
   - platform: monochromatic
-    name: "Coop Light"
-    id: coop_light
-    output: coop_light_pwm
+    name: "Light"
+    id: diy_hf_worklight_light
+    output: light_pwm
     restore_mode: RESTORE_DEFAULT_OFF
 
 sensor:
@@ -47,16 +47,16 @@ sensor:
   - platform: htu21d
     model: SI7021
     temperature:
-      name: "Board Temperature"
+      name: "Internal Temperature"
     humidity:
-      name: "Coop Humidity"
+      name: "Internal Humidity"
     update_interval: 60s
 
   # External TMP36 temperature sensor connected to A0.
   # Preserve the original firmware's 3.2 V full-scale conversion.
   - platform: adc
     pin: A0
-    name: "Coop Temperature"
+    name: "Temperature"
     update_interval: 60s
     unit_of_measurement: "°F"
     accuracy_decimals: 1
